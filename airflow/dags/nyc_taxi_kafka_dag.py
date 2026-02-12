@@ -43,7 +43,7 @@ with DAG(
         task_id="spark_kafka_to_bronze",
         application="/opt/airflow/spark_jobs/spark_kafka_to_bronze_batch.py",
         application_args=["--bootstrap","kafka:9092","--topic","trips_raw","--bronze_base",BRONZE_BASE,"--startingOffsets","earliest","--endingOffsets","latest"],
-        packages="org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.0",
+        packages="org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2",
         conf={"spark.master": "spark://spark-master:7077"}
     )
 

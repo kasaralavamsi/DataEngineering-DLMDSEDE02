@@ -23,7 +23,7 @@ with DAG(
         bash_command="/spark/bin/spark-submit \
             --master spark://spark-master:7077 \
             --packages org.postgresql:postgresql:42.6.0 \
-            /opt/spark/jobs/load_taxi_zone.py",
+            /opt/spark/app/load_taxi_zone.py",
     )
 
     spark_submit

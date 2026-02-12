@@ -1,7 +1,17 @@
-CREATE TABLE IF NOT EXISTS public.metrics_pipeline_runs (
-  run_id text PRIMARY KEY, run_epoch bigint, months_covered int, rows_gold bigint,
-  trips_total numeric, fare_total numeric, tip_total numeric, avg_distance_over_months numeric);
-CREATE TABLE IF NOT EXISTS public.dq_results (
-  run_id text PRIMARY KEY, run_epoch bigint, rows_total bigint,
-  null_trip_distance bigint, null_fare_amount bigint, bad_distance bigint, bad_fare bigint,
-  rate_null_distance numeric, rate_null_fare numeric, rate_bad_distance numeric, rate_bad_fare numeric, passed int);
+-- =============================================================
+-- Job tracking table
+-- =============================================================
+
+CREATE TABLE IF NOT EXISTS public.job_runs (
+  id           BIGSERIAL PRIMARY KEY,
+  job_name     TEXT NOT NULL,
+  started_at   TIMESTAMPTZ DEFAULT now(),
+  finished_at  TIMESTAMPTZ,
+  status       TEXT,
+  rows_written BIGINT
+);
+
+-- Create indexes for frequently queried columns
+CREATE INDEX IF NOT EXISTS idx_dq_results_run_epoch ON public.dq_results (run_epoch);
+CREATE INDEX IF NOT EXISTS idx_metrics_run_epoch ON public.metrics_pipeline_runs (run_epoch);
+CREATE INDEX IF NOT EXISTS idx_fact_trips_year_month ON public.fact_trips_monthly (year, month);

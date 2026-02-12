@@ -1,0 +1,26 @@
+# =============================================================
+# DLMDSEDE02 Phase 3 – Python Dependencies
+# =============================================================
+# Install with:  pip install -r requirements.txt
+# NOTE: PySpark, Airflow, and Kafka are provided by their
+#       respective Docker containers. This file captures ALL
+#       Python libraries referenced across the project.
+# =============================================================
+
+# --- Apache Spark (PySpark) ---
+pyspark==3.1.2
+
+# --- Apache Airflow + Providers ---
+apache-airflow==2.9.3
+apache-airflow-providers-apache-spark==4.7.2
+apache-airflow-providers-postgres==5.11.0
+
+# --- PostgreSQL ---
+psycopg2-binary==2.9.9
+
+# --- Kafka ---
+kafka-python==2.0.2
+
+# --- Data Processing ---
+pandas>=1.5.0
+pyarrow>=12.0.0

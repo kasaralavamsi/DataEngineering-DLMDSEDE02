@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLMDSEDE02 Phase 3 – Architecture Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 32px; }
+  h1 { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; color: #f8fafc; }
+  .subtitle { text-align: center; font-size: 0.85rem; color: #94a3b8; margin-bottom: 32px; }
+
+  /* ---- SVG canvas ---- */
+  svg { display: block; margin: 0 auto; }
+
+  /* ---- Tooltip ---- */
+  .tooltip {
+    position: fixed; pointer-events: none; padding: 10px 14px; border-radius: 8px;
+    background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+    font-size: 0.78rem; line-height: 1.45; max-width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.45); opacity: 0; transition: opacity .15s;
+    z-index: 100;
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip strong { color: #38bdf8; }
+
+  /* ---- Legend ---- */
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin-top: 28px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #94a3b8; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+
+  /* ---- Info cards ---- */
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 16px; margin-top: 32px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+  .info-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px 18px; }
+  .info-card h3 { font-size: 0.85rem; color: #38bdf8; margin-bottom: 8px; }
+  .info-card p { font-size: 0.78rem; color: #cbd5e1; line-height: 1.5; }
+  .info-card code { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 0.72rem; color: #7dd3fc; }
+
+  .dag-section { margin-top: 32px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+  .dag-section h2 { font-size: 1.1rem; color: #f8fafc; margin-bottom: 14px; text-align: center; }
+  .dag-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 16px; }
+  .dag-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; }
+  .dag-card h3 { font-size: 0.9rem; color: #a78bfa; margin-bottom: 6px; }
+  .dag-card .schedule { font-size: 0.72rem; color: #64748b; margin-bottom: 10px; }
+  .dag-card .steps { list-style: none; padding: 0; }
+  .dag-card .steps li { position: relative; padding: 6px 0 6px 22px; font-size: 0.78rem; color: #cbd5e1; }
+  .dag-card .steps li::before { content: ''; position: absolute; left: 6px; top: 14px; width: 8px; height: 8px; border-radius: 50%; background: #a78bfa; }
+  .dag-card .steps li + li::after { content: ''; position: absolute; left: 9px; top: -4px; width: 2px; height: 14px; background: #475569; }
+</style>
+</head>
+<body>
+
+<h1>DLMDSEDE02 Phase 3 – Data Engineering Architecture</h1>
+<p class="subtitle">NYC TLC Taxi Data Pipeline &middot; Batch + Kafka Ingestion &middot; Medallion Architecture (Bronze → Silver → Gold)</p>
+
+<svg id="arch" width="1060" height="620" viewBox="0 0 1060 620">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#64748b"/></marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#38bdf8"/></marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#a78bfa"/></marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#4ade80"/></marker>
+
+    <!-- Glows -->
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+
+    <!-- Node gradients -->
+    <linearGradient id="gIngestion" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#c2410c"/></linearGradient>
+    <linearGradient id="gKafka" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#0891b2"/></linearGradient>
+    <linearGradient id="gHDFS" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#facc15"/><stop offset="100%" stop-color="#ca8a04"/></linearGradient>
+    <linearGradient id="gSpark" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+    <linearGradient id="gBronze" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="gSilver" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#64748b"/></linearGradient>
+    <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+    <linearGradient id="gPostgres" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/></linearGradient>
+    <linearGradient id="gSuperset" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+    <linearGradient id="gAirflow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e879f9"/><stop offset="100%" stop-color="#a21caf"/></linearGradient>
+  </defs>
+
+  <!-- ======= LAYER LABELS ======= -->
+  <text x="22" y="38" fill="#475569" font-size="11" font-weight="600">DATA SOURCES</text>
+  <text x="270" y="38" fill="#475569" font-size="11" font-weight="600">INGESTION</text>
+  <text x="460" y="38" fill="#475569" font-size="11" font-weight="600">STORAGE (HDFS)</text>
+  <text x="700" y="38" fill="#475569" font-size="11" font-weight="600">PROCESSING (SPARK)</text>
+  <text x="900" y="38" fill="#475569" font-size="11" font-weight="600">SERVING</text>
+
+  <!-- ======= NODES ======= -->
+  <!-- NYC TLC API -->
+  <g class="node" data-tip="<strong>NYC TLC API</strong><br>Public API providing Yellow/Green/FHV taxi trip parquet files.<br>Downloaded by <code>download_nyc_tlc.py</code>">
+    <rect x="20" y="100" width="140" height="52" rx="10" fill="url(#gIngestion)" opacity=".9"/>
+    <text x="90" y="122" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">NYC TLC API</text>
+    <text x="90" y="138" text-anchor="middle" fill="#fed7aa" font-size="9">(Parquet files)</text>
+  </g>
+
+  <!-- CSV Dataset -->
+  <g class="node" data-tip="<strong>taxi_zone_lookup.csv</strong><br>Static reference dataset with 265 taxi zones.<br>Loaded to HDFS at bootstrap.">
+    <rect x="20" y="180" width="140" height="52" rx="10" fill="url(#gIngestion)" opacity=".9"/>
+    <text x="90" y="202" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">CSV Dataset</text>
+    <text x="90" y="218" text-anchor="middle" fill="#fed7aa" font-size="9">taxi_zone_lookup</text>
+  </g>
+
+  <!-- Kafka -->
+  <g class="node" data-tip="<strong>Apache Kafka</strong><br>Messaging backbone. <code>kafka_producer.py</code> publishes parquet rows to <code>trips_raw</code> topic.<br>Spark reads via <code>spark-sql-kafka</code> connector.">
+    <rect x="250" y="100" width="140" height="52" rx="10" fill="url(#gKafka)" opacity=".9"/>
+    <text x="320" y="122" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Apache Kafka</text>
+    <text x="320" y="138" text-anchor="middle" fill="#cffafe" font-size="9">topic: trips_raw</text>
+  </g>
+
+  <!-- HDFS Namenode -->
+  <g class="node" data-tip="<strong>HDFS NameNode</strong><br>Hadoop distributed file system – NameNode manages metadata.<br>Port 9870 (UI), 9000 (RPC).<br>Stores Bronze/Silver/Gold parquet layers.">
+    <rect x="440" y="100" width="160" height="52" rx="10" fill="url(#gHDFS)" opacity=".9"/>
+    <text x="520" y="122" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">HDFS NameNode</text>
+    <text x="520" y="138" text-anchor="middle" fill="#422006" font-size="9">:9870 / :9000</text>
+  </g>
+
+  <!-- HDFS Datanode -->
+  <g class="node" data-tip="<strong>HDFS DataNode</strong><br>Stores actual data blocks. Port 9864 (UI).">
+    <rect x="440" y="180" width="160" height="44" rx="10" fill="url(#gHDFS)" opacity=".7"/>
+    <text x="520" y="207" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">HDFS DataNode</text>
+  </g>
+
+  <!-- Bronze Layer -->
+  <g class="node" data-tip="<strong>Bronze Layer (HDFS)</strong><br>Raw ingested data in Parquet format.<br>Path: <code>/datalake/nyc/bronze/yellow_tripdata</code><br>Partitioned by year/month.">
+    <rect x="440" y="270" width="160" height="48" rx="10" fill="url(#gBronze)" opacity=".9"/>
+    <text x="520" y="292" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Bronze Layer</text>
+    <text x="520" y="306" text-anchor="middle" fill="#ddd6fe" font-size="9">/datalake/nyc/bronze</text>
+  </g>
+
+  <!-- Silver Layer -->
+  <g class="node" data-tip="<strong>Silver Layer (HDFS)</strong><br>Cleaned &amp; filtered data: trip_distance > 0, fare_amount >= 0.<br>Path: <code>/datalake/nyc/silver/yellow_tripdata</code>">
+    <rect x="440" y="350" width="160" height="48" rx="10" fill="url(#gSilver)" opacity=".9"/>
+    <text x="520" y="372" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Silver Layer</text>
+    <text x="520" y="386" text-anchor="middle" fill="#e2e8f0" font-size="9">/datalake/nyc/silver</text>
+  </g>
+
+  <!-- Gold Layer -->
+  <g class="node" data-tip="<strong>Gold Layer (HDFS)</strong><br>Aggregated KPIs: trips count, total fare, total tip, avg distance.<br>Path: <code>/datalake/nyc/gold/kpis_trips_monthly</code>">
+    <rect x="440" y="430" width="160" height="48" rx="10" fill="url(#gGold)" opacity=".9"/>
+    <text x="520" y="452" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">Gold Layer</text>
+    <text x="520" y="466" text-anchor="middle" fill="#451a03" font-size="9">/datalake/nyc/gold</text>
+  </g>
+
+  <!-- Spark Master -->
+  <g class="node" data-tip="<strong>Spark Master</strong><br>Cluster manager. Port 8080 (UI), 7077 (cluster).<br>Runs all ETL Spark jobs (bronze→silver→gold).">
+    <rect x="690" y="100" width="150" height="52" rx="10" fill="url(#gSpark)" opacity=".9"/>
+    <text x="765" y="122" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Spark Master</text>
+    <text x="765" y="138" text-anchor="middle" fill="#fed7aa" font-size="9">:8080 / :7077</text>
+  </g>
+
+  <!-- Spark Worker -->
+  <g class="node" data-tip="<strong>Spark Worker</strong><br>Executes tasks. Port 8081 (UI).">
+    <rect x="690" y="180" width="150" height="44" rx="10" fill="url(#gSpark)" opacity=".7"/>
+    <text x="765" y="207" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Spark Worker</text>
+  </g>
+
+  <!-- Spark History -->
+  <g class="node" data-tip="<strong>Spark History Server</strong><br>Browse completed Spark application logs. Port 18081.">
+    <rect x="690" y="250" width="150" height="44" rx="10" fill="url(#gSpark)" opacity=".55"/>
+    <text x="765" y="277" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Spark History</text>
+  </g>
+
+  <!-- PostgreSQL -->
+  <g class="node" data-tip="<strong>PostgreSQL 15</strong><br>Data warehouse. Tables: <code>batch_clean</code>, <code>taxi_zone_lookup</code>, <code>fact_trips_monthly</code>, <code>dq_results</code>, <code>metrics_pipeline_runs</code>, <code>job_runs</code>.<br>Port 5432.">
+    <rect x="890" y="100" width="150" height="52" rx="10" fill="url(#gPostgres)" opacity=".9"/>
+    <text x="965" y="122" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">PostgreSQL</text>
+    <text x="965" y="138" text-anchor="middle" fill="#bfdbfe" font-size="9">:5432 (nyc db)</text>
+  </g>
+
+  <!-- Adminer -->
+  <g class="node" data-tip="<strong>Adminer</strong><br>Lightweight DB UI. Port 8082.">
+    <rect x="890" y="180" width="150" height="44" rx="10" fill="url(#gPostgres)" opacity=".55"/>
+    <text x="965" y="207" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Adminer :8082</text>
+  </g>
+
+  <!-- Superset -->
+  <g class="node" data-tip="<strong>Apache Superset</strong><br>Data visualization &amp; dashboards.<br>Connects to PostgreSQL for KPI charts. Port 8089.">
+    <rect x="890" y="260" width="150" height="52" rx="10" fill="url(#gSuperset)" opacity=".9"/>
+    <text x="965" y="282" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Superset</text>
+    <text x="965" y="298" text-anchor="middle" fill="#a7f3d0" font-size="9">:8089 (Dashboards)</text>
+  </g>
+
+  <!-- Airflow -->
+  <g class="node" data-tip="<strong>Apache Airflow</strong><br>Workflow orchestration. 4 DAGs:<br>• nyc_taxi_batch<br>• nyc_taxi_kafka_batch<br>• load_taxi_zone_lookup_daily<br>• nyc_phase3_eval">
+    <rect x="440" y="530" width="380" height="56" rx="12" fill="url(#gAirflow)" opacity=".85"/>
+    <text x="630" y="554" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Apache Airflow – Orchestrator</text>
+    <text x="630" y="572" text-anchor="middle" fill="#f5d0fe" font-size="9">4 DAGs  |  SparkSubmit + Python + Bash operators</text>
+  </g>
+
+  <!-- ======= CONNECTIONS (arrows) ======= -->
+  <!-- NYC TLC → Kafka -->
+  <line x1="160" y1="126" x2="248" y2="126" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="204" y="118" fill="#64748b" font-size="8" text-anchor="middle">produce</text>
+
+  <!-- NYC TLC → HDFS (direct batch) -->
+  <line x1="160" y1="145" x2="210" y2="180" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+  <path d="M210,195 L438,290" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="300" y="238" fill="#64748b" font-size="8" text-anchor="middle">batch ingest</text>
+
+  <!-- CSV → HDFS -->
+  <path d="M160,206 Q300,206 438,150" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Kafka → Spark (read) -->
+  <path d="M390,126 Q420,126 438,126" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4,3"/>
+  <path d="M390,130 Q530,160 688,126" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <text x="540" y="80" fill="#22d3ee" font-size="8" text-anchor="middle">spark-sql-kafka</text>
+
+  <!-- Spark → Bronze -->
+  <path d="M690,145 Q650,200 602,272" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+  <text x="660" y="210" fill="#a78bfa" font-size="8" text-anchor="middle">write parquet</text>
+
+  <!-- Bronze → Silver -->
+  <line x1="520" y1="318" x2="520" y2="348" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="555" y="338" fill="#94a3b8" font-size="8">clean/filter</text>
+
+  <!-- Silver → Gold -->
+  <line x1="520" y1="398" x2="520" y2="428" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="555" y="418" fill="#fbbf24" font-size="8">aggregate</text>
+
+  <!-- Gold → PostgreSQL -->
+  <path d="M600,454 Q750,454 888,140" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <text x="780" y="340" fill="#60a5fa" font-size="8" text-anchor="middle">JDBC write</text>
+
+  <!-- Spark → PostgreSQL (DQ + metrics) -->
+  <path d="M840,126 L888,126" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- PostgreSQL → Superset -->
+  <line x1="965" y1="152" x2="965" y2="258" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="980" y="210" fill="#4ade80" font-size="8">query</text>
+
+  <!-- PostgreSQL → Adminer -->
+  <line x1="965" y1="152" x2="965" y2="178" stroke="#94a3b8" stroke-width="1"/>
+
+  <!-- Airflow orchestrates everything -->
+  <path d="M530,530 L530,480" stroke="#e879f9" stroke-width="1.2" marker-end="url(#arrow-purple)" stroke-dasharray="4,3"/>
+  <path d="M700,530 L765,296" stroke="#e879f9" stroke-width="1.2" marker-end="url(#arrow-purple)" stroke-dasharray="4,3"/>
+  <text x="730" y="430" fill="#e879f9" font-size="8" text-anchor="middle">orchestrates</text>
+
+  <!-- HDFS NN → DN -->
+  <line x1="520" y1="152" x2="520" y2="178" stroke="#ca8a04" stroke-width="1"/>
+</svg>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#f97316"></div>Data Sources</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#22d3ee"></div>Kafka Messaging</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#eab308"></div>HDFS Storage</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fb923c"></div>Spark Processing</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#a78bfa"></div>Bronze Layer</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#94a3b8"></div>Silver Layer</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24"></div>Gold Layer</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>PostgreSQL</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#10b981"></div>Superset</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#d946ef"></div>Airflow</div>
+</div>
+
+<!-- DAG pipeline cards -->
+<div class="dag-section">
+  <h2>Airflow DAG Pipelines</h2>
+  <div class="dag-cards">
+    <div class="dag-card">
+      <h3>nyc_taxi_batch</h3>
+      <div class="schedule">Schedule: @monthly</div>
+      <ol class="steps">
+        <li>prepare_dirs – Create local data directories</li>
+        <li>download_dataset – Fetch parquet from NYC TLC</li>
+        <li>spark_bronze – Raw → Bronze (Parquet on HDFS)</li>
+        <li>spark_silver – Bronze → Silver (clean/filter)</li>
+        <li>spark_gold – Silver → Gold (aggregate KPIs + JDBC write)</li>
+      </ol>
+    </div>
+    <div class="dag-card">
+      <h3>nyc_taxi_kafka_batch</h3>
+      <div class="schedule">Schedule: Manual trigger</div>
+      <ol class="steps">
+        <li>prepare_dirs – Create local data directories</li>
+        <li>download_and_produce – Fetch parquet → produce to Kafka</li>
+        <li>spark_kafka_to_bronze – Read Kafka → Bronze Parquet</li>
+        <li>spark_silver – Bronze → Silver (clean/filter)</li>
+        <li>spark_gold – Silver → Gold (aggregate KPIs + JDBC)</li>
+      </ol>
+    </div>
+    <div class="dag-card">
+      <h3>load_taxi_zone_lookup_daily</h3>
+      <div class="schedule">Schedule: Daily at 02:00 UTC</div>
+      <ol class="steps">
+        <li>spark_submit – Load taxi_zone_lookup.csv into PostgreSQL</li>
+      </ol>
+    </div>
+    <div class="dag-card">
+      <h3>nyc_phase3_eval</h3>
+      <div class="schedule">Schedule: Manual trigger</div>
+      <ol class="steps">
+        <li>start – Entry point</li>
+        <li>dq_check_silver – Data quality checks on Silver layer</li>
+        <li>evaluate_gold_metrics – Compute Gold-layer pipeline metrics</li>
+        <li>end – Exit point</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- Info cards -->
+<div class="info-grid">
+  <div class="info-card">
+    <h3>Docker Services (9 containers)</h3>
+    <p><code>namenode</code> <code>datanode</code> <code>postgres</code> <code>adminer</code> <code>spark-master</code> <code>spark-worker-1</code> <code>spark-history</code> <code>hdfs-bootstrap</code> + Airflow/Superset (referenced in README)</p>
+  </div>
+  <div class="info-card">
+    <h3>PostgreSQL Tables</h3>
+    <p><code>batch_clean</code> – Phase 2 cleaned zones &middot; <code>taxi_zone_lookup</code> – reference data &middot; <code>fact_trips_monthly</code> – Gold KPIs &middot; <code>dq_results</code> – DQ audit log &middot; <code>metrics_pipeline_runs</code> – pipeline metrics &middot; <code>job_runs</code> – job tracking</p>
+  </div>
+  <div class="info-card">
+    <h3>Key Ports</h3>
+    <p><code>9870</code> HDFS NN &middot; <code>8080</code> Spark Master &middot; <code>8081</code> Spark Worker &middot; <code>18081</code> Spark History &middot; <code>5432</code> PostgreSQL &middot; <code>8082</code> Adminer &middot; <code>8089</code> Superset</p>
+  </div>
+  <div class="info-card">
+    <h3>Medallion Architecture</h3>
+    <p><strong>Bronze</strong> – raw ingested parquet, partitioned by year/month. <strong>Silver</strong> – filtered (distance&gt;0, fare&ge;0), enriched with pickup_date. <strong>Gold</strong> – aggregated monthly KPIs written to HDFS + PostgreSQL.</p>
+  </div>
+</div>
+
+<!-- Tooltip element -->
+<div class="tooltip" id="tip"></div>
+
+<script>
+  const tip = document.getElementById('tip');
+  document.querySelectorAll('.node').forEach(n => {
+    n.style.cursor = 'pointer';
+    n.addEventListener('mouseenter', e => {
+      tip.innerHTML = n.dataset.tip;
+      tip.classList.add('show');
+    });
+    n.addEventListener('mousemove', e => {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY + 14) + 'px';
+    });
+    n.addEventListener('mouseleave', () => tip.classList.remove('show'));
+  });
+</script>
+</body>
+</html>

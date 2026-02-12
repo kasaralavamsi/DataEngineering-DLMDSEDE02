@@ -6,7 +6,7 @@ spark = (SparkSession.builder
 
 df = (spark.read
       .option("header","true")
-      .csv("hdfs://namenode:9000/datasets/taxi_zone_lookup.csv"))
+      .csv("hdfs://namenode:9000/data/raw/taxi_zone_lookup.csv"))
 
 (df.write
    .format("jdbc")

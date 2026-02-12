@@ -1,0 +1,66 @@
+# =============================================================
+# .gitignore — DLMDSEDE02 Data Engineering
+# =============================================================
+
+# ----- OS artifacts -----
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ----- Virtual environments -----
+.venv/
+venv/
+ENV/
+
+# ----- IDE / Editor -----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ----- Jupyter -----
+.ipynb_checkpoints/
+
+# ----- Airflow runtime -----
+airflow/logs/
+airflow/dags/__pycache__/
+
+# ----- Docker volumes (local data) -----
+pgdata/
+
+# ----- Temporary / backup files -----
+*.tmp
+*.log
+*.bak
+~$*
+
+# ----- Submission files (local only, NOT for GitHub) -----
+submissionready/
+submissions/
+Phase2_Submission/
+Kasarala-Vamshi_*.txt
+Kasarla-Vamshi_*.txt
+Phase2_PebblePad_Text.*
+PROJECT_STRUCTURE.md
+
+# ----- Empty placeholder directories -----
+config/
+src/
+data/
+
+# ----- Large binary files (download at runtime) -----
+# jars/             # Uncomment if you want to exclude the 1MB JAR
+# datasets/*.parquet  # Exclude large parquet downloads
