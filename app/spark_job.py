@@ -12,11 +12,7 @@ PG_TABLE   = os.getenv("PG_TABLE", "public.batch_clean")
 def main():
     spark = (
         SparkSession.builder
-<<<<<<< HEAD
         .appName("Phase3BatchJob")
-=======
-        .appName("Phase2BatchJob")
->>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
         .getOrCreate()
     )
 
