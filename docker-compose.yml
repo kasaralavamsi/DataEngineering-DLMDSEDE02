@@ -68,6 +68,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+<<<<<<< HEAD
 
   # ---------------- Kafka + Zookeeper ----------------
   zookeeper:
@@ -263,6 +264,28 @@ services:
         condition: service_completed_successfully
       airflow-db:
         condition: service_healthy
+=======
+
+  # ---------------- Spark ----------------
+  spark-master:
+    image: bde2020/spark-master:3.1.2-hadoop3.2
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+      - SPARK_HOME=/spark
+      - SPARK_EVENTLOG_ENABLED=true
+      - SPARK_EVENTLOG_DIR=/tmp/spark-events
+    ports:
+      - "8080:8080"   # Spark Master UI
+      - "7077:7077"   # Spark cluster port
+    volumes:
+      - ./datasets:/datasets:ro
+      - ./app:/opt/spark/app
+      - spark-events:/tmp/spark-events
+    depends_on: [namenode, datanode]
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
     networks: [de-net]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8083/health || exit 1"]
@@ -270,6 +293,7 @@ services:
       timeout: 10s
       retries: 10
 
+<<<<<<< HEAD
   airflow-scheduler:
     image: apache/airflow:2.9.3-python3.11
     platform: linux/amd64
@@ -313,6 +337,65 @@ services:
       interval: 20s
       timeout: 10s
       retries: 10
+=======
+  spark-worker-1:
+    image: bde2020/spark-worker:3.1.2-hadoop3.2
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8081
+      - SPARK_HOME=/spark
+      - SPARK_EVENTLOG_ENABLED=true
+      - SPARK_EVENTLOG_DIR=/tmp/spark-events
+    ports:
+      - "8081:8081"   # Worker UI
+    volumes:
+      - ./datasets:/datasets:ro
+      - ./app:/opt/spark/app
+      - spark-events:/tmp/spark-events
+    depends_on: [spark-master]
+    networks: [de-net]
+
+  spark-history:
+    image: bde2020/spark-history-server:3.1.2-hadoop3.2
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      - SPARK_HISTORY_OPTS=-Dspark.history.fs.logDirectory=/tmp/spark-events
+    ports:
+      - "18081:18081"   # History Server UI
+    volumes:
+      - spark-events:/tmp/spark-events
+    depends_on: [spark-master]
+    networks: [de-net]
+
+  # -------- One-shot HDFS bootstrap --------
+  hdfs-bootstrap:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    depends_on:
+      namenode:
+        condition: service_healthy
+    networks: [de-net]
+    volumes:
+      - ./datasets:/datasets:ro
+      - ./taxi_zone_lookup.csv:/taxi_zone_lookup.csv:ro
+    entrypoint: ["/bin/bash","-lc"]
+    command: |
+      set -e
+      echo "▶ Bootstrapping HDFS..."
+      /opt/hadoop-3.2.1/bin/hdfs dfs -mkdir -p /data/raw
+      if ls -1 /datasets/*.csv >/dev/null 2>&1; then
+        /opt/hadoop-3.2.1/bin/hdfs dfs -put -f /datasets/*.csv /data/raw
+      fi
+      if [ -f /taxi_zone_lookup.csv ]; then
+        /opt/hadoop-3.2.1/bin/hdfs dfs -put -f /taxi_zone_lookup.csv /data/raw/
+      fi
+      echo "✅ HDFS bootstrap done"
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
 
 # ---------------- Shared Volumes & Network ----------------
 volumes:
@@ -320,11 +403,14 @@ volumes:
   hdfs-datanode: {}
   pgdata: {}
   spark-events: {}
+<<<<<<< HEAD
   zookeeper-data: {}
   kafka-data: {}
   airflow-logs: {}
   airflow-pgdata: {}
   airflow-pip: {}
+=======
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
 
 networks:
   de-net:

@@ -1,15 +1,20 @@
+<<<<<<< HEAD
 -- =============================================================
 -- PostgreSQL Init Script – Phase 3
 -- Creates all tables used by the pipeline
 -- =============================================================
 
 -- Phase 2 batch_clean table (Spark job writes cleaned zone data)
+=======
+-- Create an extension/schema if you want, not required.
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
 CREATE TABLE IF NOT EXISTS public.batch_clean (
   LocationID   INT,
   Borough      TEXT,
   Zone         TEXT,
   service_zone TEXT,
   loaded_at    TIMESTAMPTZ DEFAULT now()
+<<<<<<< HEAD
 );
 
 -- Taxi zone lookup reference table (loaded by load_taxi_zone.py)
@@ -58,3 +63,6 @@ CREATE TABLE IF NOT EXISTS public.metrics_pipeline_runs (
   tip_total                 DOUBLE PRECISION,
   avg_distance_over_months  DOUBLE PRECISION
 );
+=======
+);
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd

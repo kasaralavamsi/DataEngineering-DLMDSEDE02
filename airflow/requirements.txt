@@ -1,6 +1,10 @@
 apache-airflow-providers-postgres==5.11.0
+<<<<<<< HEAD
 apache-airflow-providers-apache-spark==4.7.2
 psycopg2-binary==2.9.9
 kafka-python==2.0.2
 pandas>=1.5.0
 pyarrow>=12.0.0
+=======
+psycopg2-binary==2.9.9
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd

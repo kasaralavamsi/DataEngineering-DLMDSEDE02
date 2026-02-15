@@ -8,7 +8,11 @@ NN=$(get_c namenode || true)
 DN=$(get_c datanode || true)
 KF=$(get_c kafka || true)
 ZK=$(get_c zookeeper || true)
+<<<<<<< HEAD
 PG=$(get_c "postgres" | grep -v airflow || true)
+=======
+PG=$(get_c postgres || true)
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
 SM=$(get_c spark-master || true)
 AW=$(get_c airflow-webserver || true)
 
@@ -18,7 +22,11 @@ docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 echo
 echo "== HDFS check =="
 if [[ -n "${NN}" ]]; then
+<<<<<<< HEAD
   docker exec -it "$NN" bash -lc 'hdfs dfs -mkdir -p /tmp && hdfs dfs -ls /data/raw'
+=======
+  docker exec -it "$NN" bash -lc 'hdfs dfs -mkdir -p /tmp && hdfs dfs -ls /'
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
 else
   echo "WARN: namenode not found"
 fi
@@ -27,7 +35,11 @@ echo
 echo "== Kafka topic create/list =="
 if [[ -n "${KF}" ]]; then
   docker exec -it "$KF" bash -lc "/opt/bitnami/kafka/bin/kafka-topics.sh \
+<<<<<<< HEAD
     --create --if-not-exists --topic trips_raw \
+=======
+    --create --if-not-exists --topic demo_topic \
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
     --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092 && \
     /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092"
 else
@@ -43,12 +55,18 @@ else
 fi
 
 echo
+<<<<<<< HEAD
 echo "== Spark test (with JDBC driver) =="
 if [[ -n "${SM}" ]]; then
   docker exec -it "$SM" bash -lc '
     test -f /opt/spark/app/spark_job.py && \
     spark-submit --packages org.postgresql:postgresql:42.6.0 /opt/spark/app/spark_job.py || \
     echo "No spark_job.py found; skipping."'
+=======
+echo "== Spark test (optional) =="
+if [[ -n "${SM}" ]]; then
+  docker exec -it "$SM" bash -lc 'test -f /opt/spark/app/spark_job.py && spark-submit /opt/spark/app/spark_job.py || echo "No spark_job.py found; skipping."'
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
 else
   echo "WARN: spark-master not found"
 fi
@@ -62,4 +80,8 @@ else
 fi
 
 echo
+<<<<<<< HEAD
 echo "All checks attempted."
+=======
+echo "All checks attempted."
+>>>>>>> 778e3e725a2aa2d44da11823497b0d8da72a3ccd
