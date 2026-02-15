@@ -51,10 +51,33 @@ pgdata/
 submissionready/
 submissions/
 Phase2_Submission/
-Kasarala-Vamshi_*.txt
-Kasarla-Vamshi_*.txt
+PHASE2_SUBMISSION_COMPLETE/
+FINAL_SUBMISSION_PHASE3/
+Kasarala-Vamshi_*
+Kasarla-Vamshi_*
 Phase2_PebblePad_Text.*
 PROJECT_STRUCTURE.md
+
+# ----- Temporary reports and cleanup files -----
+CODE_HEALTH_REPORT.md
+MERGE_CONFLICT_FIX_SUMMARY.md
+GIT_CLEANUP_SUMMARY.txt
+CLEANUP_*.txt
+CLEANUP_*.md
+MANUAL_CLEANUP_GUIDE.md
+
+# ----- Documentation files (keep only architecture diagrams) -----
+*.docx
+*.pdf
+# But KEEP architecture diagrams:
+!docs/architecture/*.drawio
+!docs/architecture/*.png
+
+# ----- Other temporary diagrams (NOT architecture) -----
+*.drawio
+*.png
+# Exception: Keep architecture folder
+!docs/architecture/
 
 # ----- Empty placeholder directories -----
 config/
