@@ -64,8 +64,9 @@ check_service "postgres" "5432" ""
 
 # Try to connect to PostgreSQL
 echo "Testing PostgreSQL connection..."
-if docker compose ps | grep -q "postgres.*healthy"; then
-    if docker exec postgres psql -U nyc -d nyc -c "SELECT version();" > /dev/null 2>&1; then
+POSTGRES_CONTAINER=$(docker ps --format '{{.Names}}' | grep postgres | grep -v airflow | head -1)
+if [ -n "$POSTGRES_CONTAINER" ]; then
+    if docker exec "$POSTGRES_CONTAINER" psql -U nyc -d nyc -c "SELECT 1;" > /dev/null 2>&1; then
         echo -e "   ${GREEN}✅ PostgreSQL connection successful${NC}"
         echo ""
         echo "   Connection Details:"
@@ -99,8 +100,9 @@ check_service "zookeeper" "2181" ""
 
 # Try to connect to Kafka
 echo "Testing Kafka connection..."
-if docker compose ps | grep -q "kafka.*Up"; then
-    if docker exec kafka kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1; then
+KAFKA_CONTAINER=$(docker ps --format '{{.Names}}' | grep kafka | head -1)
+if [ -n "$KAFKA_CONTAINER" ]; then
+    if docker exec "$KAFKA_CONTAINER" kafka-topics --list --bootstrap-server localhost:9092 > /dev/null 2>&1; then
         echo -e "   ${GREEN}✅ Kafka broker accessible${NC}"
         echo ""
         echo "   Connection Details:"
