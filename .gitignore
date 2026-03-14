@@ -89,8 +89,9 @@ MANUAL_CLEANUP_GUIDE.md
 
 # ----- Empty placeholder directories -----
 config/
-src/
 data/
+# src/scripts is tracked (Airflow Docker volume mount needs these files)
+src/**/__pycache__/
 
 # ----- Large binary files (download at runtime) -----
 # jars/             # Uncomment if you want to exclude the 1MB JAR
