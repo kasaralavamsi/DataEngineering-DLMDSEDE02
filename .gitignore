@@ -1,0 +1,97 @@
+# =============================================================
+# .gitignore — DLMDSEDE02 Data Engineering
+# =============================================================
+
+# ----- OS artifacts -----
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ----- Virtual environments -----
+.venv/
+venv/
+ENV/
+
+# ----- IDE / Editor -----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ----- Jupyter -----
+.ipynb_checkpoints/
+
+# ----- Airflow runtime -----
+airflow/logs/
+airflow/dags/__pycache__/
+
+# ----- Docker volumes (local data) -----
+pgdata/
+
+# ----- Temporary / backup files -----
+*.tmp
+*.log
+*.bak
+~$*
+
+# ----- Submission files -----
+submissionready/
+submissions/
+PHASE2_SUBMISSION_COMPLETE/
+FINAL_SUBMISSION_PHASE3/
+Phase2_PebblePad_Text.*
+PROJECT_STRUCTURE.md
+
+# ----- IU Submission deliverables (INCLUDE in git) -----
+# Phase2_Submission/ and named submission files are tracked
+!Phase2_Submission/
+!Phase2_Submission/**
+!Kasarala-Vamshi_*
+!Kasarla-Vamshi_*
+
+# ----- Temporary reports and cleanup files -----
+CODE_HEALTH_REPORT.md
+MERGE_CONFLICT_FIX_SUMMARY.md
+GIT_CLEANUP_SUMMARY.txt
+ARCHITECTURE_FILES_CLEANUP.txt
+CLEANUP_*.txt
+CLEANUP_*.md
+MANUAL_CLEANUP_GUIDE.md
+
+# ----- Documentation files -----
+*.docx
+*.pdf
+*.drawio
+*.png
+# Keep architecture folder
+!docs/architecture/
+!docs/architecture/*.drawio
+!docs/architecture/*.png
+# Keep Phase2 submission documents
+!Phase2_Submission/**/*.docx
+!Phase2_Submission/**/*.pdf
+!Phase2_Submission/**/*.png
+!Phase2_Submission/**/*.txt
+!Phase2_Submission/**/*.zip
+
+# ----- Empty placeholder directories -----
+config/
+src/
+data/
+
+# ----- Large binary files (download at runtime) -----
+# jars/             # Uncomment if you want to exclude the 1MB JAR
+# datasets/*.parquet  # Exclude large parquet downloads

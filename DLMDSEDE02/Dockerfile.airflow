@@ -1,0 +1,39 @@
+FROM apache/airflow:2.9.3-python3.11
+
+USER root
+
+# Install Java 17 (headless) + curl — works on both amd64 and arm64
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-jdk-headless curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME via the default-java symlink (distro-agnostic)
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Install Spark 3.1.2 (pure-Java build — runs on any CPU architecture)
+RUN curl -fsSL https://archive.apache.org/dist/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tgz \
+    | tar -xz -C /opt/ \
+    && ln -s /opt/spark-3.1.2-bin-hadoop3.2 /opt/spark
+
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$SPARK_HOME/bin:$PATH
+
+# Required for Spark 3.x on Java 17 (module access warnings become errors otherwise)
+ENV JAVA_TOOL_OPTIONS="\
+--add-opens=java.base/java.lang=ALL-UNNAMED \
+--add-opens=java.base/java.lang.invoke=ALL-UNNAMED \
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
+--add-opens=java.base/java.io=ALL-UNNAMED \
+--add-opens=java.base/java.net=ALL-UNNAMED \
+--add-opens=java.base/java.nio=ALL-UNNAMED \
+--add-opens=java.base/java.util=ALL-UNNAMED \
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED \
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED \
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
+--add-opens=java.base/sun.nio.cs=ALL-UNNAMED \
+--add-opens=java.base/sun.security.action=ALL-UNNAMED \
+--add-opens=java.base/sun.util.calendar=ALL-UNNAMED"
+
+USER airflow
