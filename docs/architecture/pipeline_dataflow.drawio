@@ -1,0 +1,104 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.8">
+  <diagram name="Data Flow Diagram" id="dataflow">
+    <mxGraphModel dx="946" dy="644" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" background="#ffffff" math="0" shadow="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" value="NYC Taxi Pipeline - Data Flow" vertex="1">
+          <mxGeometry height="40" width="600" x="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="source" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" value="NYC TLC&#xa;Trip Data&#xa;(CSV)" vertex="1">
+          <mxGeometry height="100" width="120" x="100" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="hdfs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1" value="HDFS&#xa;Distributed&#xa;Storage&#xa;&#xa;🥉 BRONZE" vertex="1">
+          <mxGeometry height="100" width="140" x="300" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="spark" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;fontSize=13;fontStyle=1" value="Apache Spark&lt;br&gt;PySpark ETL&lt;br&gt;&lt;br&gt;Transform &amp;amp;&lt;br&gt;Validate&lt;div&gt;🥈 SILVER&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="140" x="520" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="postgres" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffd966;strokeColor=#d6b656;fontSize=13;fontStyle=1" value="PostgreSQL&lt;br&gt;Data Warehouse&lt;br&gt;&lt;br&gt;🥇 GOLD" vertex="1">
+          <mxGeometry height="100" width="140" x="740" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="superset" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a8e063;strokeColor=#36393d;fontSize=13;fontStyle=1" value="Apache&#xa;Superset&#xa;&#xa;BI Dashboard" vertex="1">
+          <mxGeometry height="100" width="140" x="960" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="airflow" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;fontSize=14;fontStyle=1;dashed=1;dashPattern=8 8;" value="Apache Airflow Orchestration" vertex="1">
+          <mxGeometry height="40" width="580" x="300" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=2" value="Apache Kafka (Streaming - Optional)" vertex="1">
+          <mxGeometry height="40" width="360" x="300" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow1" edge="1" parent="1" source="source" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=4;fillColor=#dae8fc;strokeColor=#0078d4;" target="hdfs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow1-label" connectable="0" parent="arrow1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" value="Batch Upload" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="2" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow2" edge="1" parent="1" source="hdfs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=4;fillColor=#d5e8d4;strokeColor=#82b366;" target="spark">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow2-label" connectable="0" parent="arrow2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" value="Read Raw" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="2" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow3" edge="1" parent="1" source="spark" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=4;fillColor=#e1d5e7;strokeColor=#9673a6;" target="postgres">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow3-label" connectable="0" parent="arrow3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" value="Clean &amp; Load" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="2" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow4" edge="1" parent="1" source="postgres" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=4;fillColor=#fff4e6;strokeColor=#d79b00;" target="superset">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow4-label" connectable="0" parent="arrow4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;fontStyle=1;labelBackgroundColor=#ffffff;" value="Query Analytics" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="2" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="orch1" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#10739e;dashed=1;dashPattern=5 5;" target="hdfs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="orch2" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#10739e;dashed=1;dashPattern=5 5;" target="spark">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="orch3" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#10739e;dashed=1;dashPattern=5 5;" target="postgres">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stream1" edge="1" parent="1" source="kafka" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;dashed=1;dashPattern=3 3;" target="spark">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="590" y="340" />
+              <mxPoint x="590" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-box" parent="1" style="swimlane;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;startSize=25;" value="LEGEND" vertex="1">
+          <mxGeometry height="120" width="1000" x="100" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" parent="legend-box" style="text;html=1;strokeColor=#0078d4;fillColor=#dae8fc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;strokeWidth=3;" value="→ Batch Data Flow" vertex="1">
+          <mxGeometry height="30" width="150" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" parent="legend-box" style="text;html=1;strokeColor=#10739e;fillColor=#b1ddf0;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;strokeWidth=2;dashed=1" value="⤍ Orchestration" vertex="1">
+          <mxGeometry height="30" width="150" x="190" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" parent="legend-box" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;strokeWidth=2;dashed=1" value="⤏ Streaming (Optional)" vertex="1">
+          <mxGeometry height="30" width="170" x="360" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" parent="legend-box" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2" value="🥉 Bronze: Raw data | 🥈 Silver: Cleaned | 🥇 Gold: Aggregated" vertex="1">
+          <mxGeometry height="30" width="430" x="550" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tech-info" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=2" value="14 Docker Containers | 4 Airflow DAGs | 5 Spark Jobs | Medallion Architecture | Python 3.11" vertex="1">
+          <mxGeometry height="30" width="1000" x="100" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="ports" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2" value="Key Ports: HDFS :9870 | Spark :8080 | PostgreSQL :5432 | Airflow :8083 | Kafka :9092 | Superset :8089" vertex="1">
+          <mxGeometry height="30" width="1000" x="100" y="620" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
