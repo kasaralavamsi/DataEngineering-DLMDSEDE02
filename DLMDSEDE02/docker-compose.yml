@@ -181,6 +181,10 @@ services:
       - SPARK_HOME=/spark
       - SPARK_EVENTLOG_ENABLED=true
       - SPARK_EVENTLOG_DIR=/tmp/spark-events
+      # Allow the worker to offer up to 4 GB to executors.
+      # Default is 1 GB which causes disk-spill during the silver repartition
+      # shuffle on a full monthly NYC taxi file (~3 M rows).
+      - SPARK_WORKER_MEMORY=4g
     ports:
       - "8081:8081"   # Worker UI
     volumes:
@@ -344,6 +348,11 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
       - AIRFLOW__CORE__FERNET_KEY=81HqDtbqAywKSOumSha3BhWNOdQ26slT6K0YaZeZyPs=
       - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      # Raise zombie detection threshold from default 300 s (5 min) to 7200 s (2 h).
+      # SparkSubmitOperator blocks the worker thread while piping Spark stdout —
+      # it cannot send heartbeats during that time.  Without this setting Airflow
+      # marks the running Spark task as a zombie and kills it mid-execution.
+      - AIRFLOW__SCHEDULER__SCHEDULER_ZOMBIE_TASK_THRESHOLD=7200
     # Self-healing: if airflow-init ever misses or races, this guard re-runs
     # db init before starting the scheduler so the container never crash-loops.
     command: >

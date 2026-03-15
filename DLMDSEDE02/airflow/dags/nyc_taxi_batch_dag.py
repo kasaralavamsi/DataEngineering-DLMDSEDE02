@@ -123,6 +123,16 @@ with DAG(
     t0 = PythonOperator(task_id="prepare_dirs",    python_callable=ensure_dirs)
     t1 = PythonOperator(task_id="download_dataset", python_callable=download_and_stage)
 
+    # Shared Spark config applied to every SparkSubmitOperator.
+    # executor_memory=2g  — prevents disk-spill during the silver repartition
+    #                        shuffle on a full monthly NYC taxi file (~3 M rows).
+    # execution_timeout   — 2 h ceiling stops run-away jobs while being safely
+    #                        above the expected ~40 min worst-case runtime.
+    #                        Without this Airflow falls back to the global
+    #                        default (None) so zombie detection is the only
+    #                        kill mechanism.
+    _SPARK_CONF = {"spark.master": "spark://spark-master:7077"}
+
     # spark_bronze reads the HDFS URI pushed by download_dataset so that
     # every Spark executor (on any worker node) can open it.
     spark_bronze = SparkSubmitOperator(
@@ -133,7 +143,9 @@ with DAG(
             "--input",       "{{ ti.xcom_pull(task_ids='download_dataset', key='hdfs_input') }}",
             "--bronze_base", BRONZE_BASE,
         ],
-        conf={"spark.master": "spark://spark-master:7077"},
+        executor_memory="2g",
+        conf=_SPARK_CONF,
+        execution_timeout=timedelta(hours=2),
         retries=1,
         retry_delay=timedelta(minutes=2),
     )
@@ -146,7 +158,9 @@ with DAG(
             "--bronze_base", BRONZE_BASE,
             "--silver_base", SILVER_BASE,
         ],
-        conf={"spark.master": "spark://spark-master:7077"},
+        executor_memory="2g",
+        conf=_SPARK_CONF,
+        execution_timeout=timedelta(hours=2),
         retries=1,
         retry_delay=timedelta(minutes=2),
     )
@@ -162,7 +176,9 @@ with DAG(
             "--jdbc_password", "nyc",
         ],
         packages="org.postgresql:postgresql:42.7.3",
-        conf={"spark.master": "spark://spark-master:7077"},
+        executor_memory="2g",
+        conf=_SPARK_CONF,
+        execution_timeout=timedelta(hours=2),
         retries=1,
         retry_delay=timedelta(minutes=2),
     )
